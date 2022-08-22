@@ -52,7 +52,7 @@ let b:undo_ftplugin =
 
 augroup vim-zig
     autocmd! * <buffer>
-    autocmd BufWritePre <buffer> if get(g:, 'zig_fmt_autosave', 1) | call zig#fmt#Format() | endif
+    autocmd BufWritePost <buffer> if get(g:, 'zig_fmt_autosave', 1) | call zig#fmt#Format() | endif
 augroup END
 
 let b:undo_ftplugin .= '|au! vim-zig * <buffer>'

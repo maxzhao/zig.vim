@@ -13,22 +13,22 @@ function! zig#fmt#Format() abort
     return
   endif
 
-  let cmdline = 'zig fmt --stdin --ast-check'
-  let current_buf = bufnr('')
+  let cmdline = 'zig fmt --ast-check ' . expand("%:p")
+  " let current_buf = bufnr('')
 
   " The formatted code is output on stdout, the errors go on stderr.
   if exists('*systemlist')
-    silent let out = systemlist(cmdline, current_buf)
+    silent let out = systemlist(cmdline)
   else
-    silent let out = split(system(cmdline, current_buf))
+    silent let out = split(system(cmdline))
   endif
   if len(out) == 1
     if out[0] == "error: unrecognized parameter: '--ast-check'"
       let cmdline = 'zig fmt --stdin'
       if exists('*systemlist')
-        silent let out = systemlist(cmdline, current_buf)
+        silent let out = systemlist(cmdline)
       else
-        silent let out = split(system(cmdline, current_buf))
+        silent let out = split(system(cmdline))
       endif
     endif
   endif
@@ -40,17 +40,22 @@ function! zig#fmt#Format() abort
     try | silent undojoin | catch | endtry
 
     " Replace the file content with the formatted version.
-    if exists('*deletebufline')
-      call deletebufline(current_buf, len(out), line('$'))
-    else
-      silent execute ':' . len(out) . ',' . line('$') . ' delete _'
-    endif
-    call setline(1, out)
+    " if exists('*deletebufline')
+    "   call deletebufline(current_buf, len(out), line('$'))
+    " else
+    "   silent execute ':' . len(out) . ',' . line('$') . ' delete _'
+    " endif
+    " call setline(1, out)
+    edit!
+    redraw!
 
     " No errors detected, close the loclist.
     call setloclist(0, [], 'r')
     lclose
   elseif get(g:, 'zig_fmt_parse_errors', 1)
+    edit!
+    redraw!
+
     let errors = s:parse_errors(expand('%'), out)
 
     call setloclist(0, [], 'r', {
